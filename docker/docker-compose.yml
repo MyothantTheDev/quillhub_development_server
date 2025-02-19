@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    restart: always
+    container_name: mongo-container
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - "3306:27017"
+    volumes:
+      - mongo_db_data:/var/lib/mongo
+
+volumes:
+  mongo_db_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: D:\Database\MongoDB\data
+      o: bind
