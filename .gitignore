@@ -1,5 +1,6 @@
 /Lib
 /Scripts
 /server/__pycache__
+__pycache__
 *.cfg
 quillhub.env
