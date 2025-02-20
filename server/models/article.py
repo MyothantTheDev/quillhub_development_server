@@ -20,7 +20,7 @@ TagType = (
 
 #An embedded document for a block within an article.
 class ArticleBlock(EmbeddedDocument):
-  type = StringField(choice=ArticleBlockType, required=True)
+  type = StringField(choices=ArticleBlockType, required=True)
   text = StringField()
   image = StringField()
   serial_number = IntField(required=True)
