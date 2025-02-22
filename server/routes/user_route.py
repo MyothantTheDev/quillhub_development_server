@@ -6,4 +6,5 @@ users_bp = Blueprint('users', __name__)
 
 users_bp.add_url_rule('/account', methods=['GET'], view_func=users.user_detail_service)
 users_bp.add_url_rule('/account/update', methods=['POST'], view_func=users.user_update_service)
-users_bp.add_url_rule('/register', methods=['GET'], view_func=users.account_register)
+users_bp.add_url_rule('/register', methods=['POST'], view_func=users.account_register)
+users_bp.add_url_rule('/login', methods=['POST'], view_func=users.user_login)
