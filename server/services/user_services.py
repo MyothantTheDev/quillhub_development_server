@@ -3,7 +3,7 @@ from server.schema.user_schema import RegisterSchema, ValidationError, LoginSche
 from flask import request, jsonify, session, make_response
 from copy import deepcopy
 from server.utils.token_generator import token_generator
-from flask_login import login_user
+from flask_login import login_user, current_user
 import bcrypt
 
 # user profile
@@ -44,6 +44,8 @@ def account_register():
 def user_login():
   request_cp : dict = deepcopy(request.json)
   try:
+    if current_user.is_authenticated:
+      return {'status': 200, 'message': 'Already Login.'}
     validated_result = LoginSchema().load(request_cp)
     user = User.objects(email__exact=validated_result.get('email')).first()
     if user and bcrypt.checkpw(validated_result.get('password').encode('utf-8'), user.password.encode('utf-8')):
