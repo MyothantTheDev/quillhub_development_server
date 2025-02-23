@@ -4,6 +4,11 @@ import bcrypt
 from flask_login import UserMixin
 from itsdangerous import TimedSerializer as Serializer
 from flask import current_app
+from server import _login_manager
+
+@_login_manager.user_loader
+def load_user(user_id):
+  return User.objects(id=user_id).first()
 
 role_types = {
   ('ADMIN', 'admin'),
