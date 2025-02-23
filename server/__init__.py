@@ -7,13 +7,15 @@ from flask_login import LoginManager
 
 load_dotenv(os.path.abspath(__name__)+'\\config\\quillhub.env')
 
+_bcrypt = Bcrypt()
+_login_manager = LoginManager()
+
 class Server:
   
   def __init__(self):
     db_uri = os.getenv('DB_URI')
     connect(host=db_uri)
-    self._bcrypt = Bcrypt()
-    self._login_manager = LoginManager()
+    
 
   def _routes(self, app: Flask):
 
@@ -27,8 +29,8 @@ class Server:
     app.config.from_mapping(SECRET_KEY=os.getenv('SECRET_KEY'))
     app.config['SESSION_COOKIE_HTTPONLY'] = True
 
-    self._bcrypt.init_app(app) # encryption install
-    self._login_manager.init_app(app) # login manager install
+    _bcrypt.init_app(app) # encryption install
+    _login_manager.init_app(app) # login manager install
 
     '''
     Routers
