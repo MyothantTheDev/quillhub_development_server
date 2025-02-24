@@ -1,13 +1,18 @@
 from server.models.user import User
+from server.models.favourite import UserFavouriteArticle
 from server.schema.user_schema import RegisterSchema, ValidationError, LoginSchema
 from flask import request, jsonify, session, make_response
 from copy import deepcopy
-from server.utils.token_generator import token_generator
-from flask_login import login_user, current_user
+from server.utils.token_generator import token_generator, jwt_required
+from flask_login import login_user, current_user, logout_user, login_required
 import bcrypt
 
 # user profile
-def user_detail_service():...
+@jwt_required
+@login_required
+def user_detail_service():
+  favourite_articles = UserFavouriteArticle.objects(user=current_user.id)
+  return {'status': 200, 'message': 'user detail'}
 
 # user update profile
 def user_update_service():...
@@ -52,6 +57,7 @@ def user_login():
       login_user(user, remember=validated_result.get('remember'))
       jwtToken = token_generator(user)
       session['jwtToken'] = jwtToken
+      print(jwtToken)
       response = make_response({'status': 200, 'message': 'Login Successful.'})
       response.set_cookie('token', jwtToken, httponly=True)
       return response
@@ -60,3 +66,11 @@ def user_login():
     return jsonify(
       {'status': 400, 'message': err.messages}
     )
+  
+
+def user_logout():
+  logout_user()
+  session.clear()
+  response = make_response({'status': 200, 'message': 'User Logout.'})
+  response.set_cookie('token', '', expires=0)
+  return response
