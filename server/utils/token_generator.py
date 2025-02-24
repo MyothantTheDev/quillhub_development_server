@@ -1,5 +1,7 @@
-from flask import current_app, jsonify
+from flask import current_app, request
+from flask_login import current_user
 from server.models.user import User
+from copy import deepcopy
 import jwt
 import datetime
 
@@ -9,3 +11,20 @@ def token_generator(user : User):
   expire = datetime.datetime.utcnow() + datetime.timedelta(days=7)
   user = {'user': user.to_dict(), 'expire': expire.date().isoformat()}
   return jwt.encode(user, key, algorithm="HS256")
+
+def jwt_required(func):
+
+  def jwt_check(*args, **kwargs):
+    try:
+      encoded_cookies = [header.strip().split('=') for header in request.headers['Cookie'].split(';')]
+      decoded_codkies = {}
+      for key, value in encoded_cookies:
+        decoded_codkies[key] =  value
+      token = jwt.decode(decoded_codkies.get('token'), current_app.config['SECRET_KEY'], algorithms="HS256")
+      if token['user']['id'] ==  str(current_user.id):
+        return func(*args, **kwargs)
+      return {'status': 401, 'message': 'Unauthorize'}
+    except:
+      return {'status': 401, 'message': 'Unauthorize'}
+
+  return jwt_check
