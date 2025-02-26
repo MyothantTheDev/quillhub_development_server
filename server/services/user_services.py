@@ -11,8 +11,11 @@ import bcrypt
 @jwt_required
 @login_required
 def user_detail_service():
-  favourite_articles = UserFavouriteArticle.objects(user=current_user.id)
-  return {'status': 200, 'message': 'user detail'}
+  favourite_articles = UserFavouriteArticle.objects(user=current_user.id).select_related()
+  articles = [fav.article for fav in favourite_articles]
+  user_data = current_user.to_dict()
+  user_data['favourite_articles'] = articles
+  return {'status': 200, 'message': 'user detail', 'data': user_data}
 
 # user update profile
 def user_update_service():...
@@ -57,7 +60,6 @@ def user_login():
       login_user(user, remember=validated_result.get('remember'))
       jwtToken = token_generator(user)
       session['jwtToken'] = jwtToken
-      print(jwtToken)
       response = make_response({'status': 200, 'message': 'Login Successful.'})
       response.set_cookie('token', jwtToken, httponly=True)
       return response
@@ -67,10 +69,13 @@ def user_login():
       {'status': 400, 'message': err.messages}
     )
   
-
+@jwt_required
+@login_required
 def user_logout():
   logout_user()
   session.clear()
+  print(request.headers)
   response = make_response({'status': 200, 'message': 'User Logout.'})
   response.set_cookie('token', '', expires=0)
+  response.set_cookie('remember_token', '', expires=0)
   return response
