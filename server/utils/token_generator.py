@@ -1,7 +1,7 @@
 from flask import current_app, request
 from flask_login import current_user
 from server.models.user import User
-from copy import deepcopy
+from functools import wraps
 import jwt
 import datetime
 
@@ -13,7 +13,7 @@ def token_generator(user : User):
   return jwt.encode(user, key, algorithm="HS256")
 
 def jwt_required(func):
-
+  @wraps(func)
   def jwt_check(*args, **kwargs):
     try:
       encoded_cookies = [header.strip().split('=') for header in request.headers['Cookie'].split(';')]
