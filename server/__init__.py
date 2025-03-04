@@ -12,7 +12,7 @@ _login_manager = LoginManager()
 
 class Server:
   
-  def __init__(self):
+  def connect(self):
     db_uri = os.getenv('DB_URI')
     connect(host=db_uri)
     
@@ -23,8 +23,7 @@ class Server:
 
     app.register_blueprint(users_bp) # install user routes
 
-  def start(self, debug=True, host='127.0.0.1', port=5000):
-
+  def set_up(self):
     app = Flask(__name__)
     app.config.from_mapping(SECRET_KEY=os.getenv('SECRET_KEY'))
     app.config['SESSION_COOKIE_HTTPONLY'] = True
@@ -37,4 +36,9 @@ class Server:
     '''
     self._routes(app)
 
+    return app
+
+  def start(self, debug=True, host='127.0.0.1', port=5000):
+    self.connect()
+    app = self.set_up()
     app.run(debug=debug, host=host, port=port)
