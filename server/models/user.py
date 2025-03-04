@@ -27,6 +27,12 @@ class Role(EmbeddedDocument):
   role = StringField(max_length=10, min_length=4, choices=role_types)
   permission = StringField(max_length=3, choices=permission_types)
 
+  def to_dict(self):
+    return {
+      "role": self.role,
+      "permission": self.permission
+    }
+
 class User(Document, UserMixin):
   username = StringField(max_length=35, required=True)
   password = StringField(required=True, min_length=8)
@@ -48,11 +54,11 @@ class User(Document, UserMixin):
       "username": self.username,
       "email" : self.email,
       "image": self.image,
-      "role" : self.role
+      "role" : self.role.to_dict()
     }
   
   def get_reset_token(self, expire_sec=1800):
-    s = Serializer(current_app.config['SECRET_KEY'])
+    s = Serializer(current_app.config['SECRET_KEY'], )
     return s.dump({'user_id': self.id}).decode('utf-8')
 
 signals.pre_save.connect(User.pre_save, sender=User)
