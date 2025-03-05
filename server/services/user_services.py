@@ -18,6 +18,8 @@ def user_detail_service():
   return {'status': 200, 'message': 'user detail', 'data': user_data}
 
 # user update profile
+@jwt_required
+@login_required
 def user_update_service():...
 
 # user regiester
@@ -25,7 +27,7 @@ def account_register():
   request_cp : dict = deepcopy(request.json)
   try:
     validated_result = RegisterSchema().load(request_cp)
-    user_check = User.objects(email__exact=validated_result.get('email'))
+    user_check = User.objects(email__exact=validated_result.get('email')).first()
     if user_check:
       return jsonify(
         {
@@ -37,14 +39,13 @@ def account_register():
     return jsonify(
         {
           'status': 200, 
-          'message': 'Your account has been created! You are now able to log in.',
-          'user' : user.to_json()
+          'message': f'Your account ({user.username}) has been created! You are now able to log in.',
        }
       )
   except ValidationError as err:
     return jsonify(
       {'status': 400, 'message': err.messages}
-      )
+    )
   
 
 
@@ -74,8 +75,21 @@ def user_login():
 def user_logout():
   logout_user()
   session.clear()
-  print(request.headers)
   response = make_response({'status': 200, 'message': 'User Logout.'})
   response.set_cookie('token', '', expires=0)
   response.set_cookie('remember_token', '', expires=0)
   return response
+
+@jwt_required
+@login_required
+def user_deactivate():
+  user = User.objects(id=current_user.id).first()
+  if user:
+    user.delete()
+    logout_user()
+    session.clear()
+    response = make_response({'status': 200, 'message': 'User account delected.'})
+    response.set_cookie('token', '', expires=0)
+    response.set_cookie('remember_token', '', expires=0)
+    return response
+  return {'status': 400, 'message': 'Something went wrong.'}
