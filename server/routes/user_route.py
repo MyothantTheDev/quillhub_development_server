@@ -9,3 +9,4 @@ users_bp.add_url_rule('/account/update', methods=['POST'], view_func=users.user_
 users_bp.add_url_rule('/register', methods=['POST'], view_func=users.account_register)
 users_bp.add_url_rule('/login', methods=['POST'], view_func=users.user_login)
 users_bp.add_url_rule('/logout', methods=['GET'], view_func=users.user_logout)
+users_bp.add_url_rule('/account/deactivate', methods=['POST'], view_func=users.user_deactivate)
