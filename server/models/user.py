@@ -44,9 +44,10 @@ class User(Document, UserMixin):
 
   @classmethod
   def pre_save(cls, sender, document, **kwargs):
-    salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(document.password.encode('utf-8'), salt)
-    document.password = hashed.decode('utf-8')
+    if not document.password.startswith('$2b'):
+      salt = bcrypt.gensalt()
+      hashed = bcrypt.hashpw(document.password.encode('utf-8'), salt)
+      document.password = hashed.decode('utf-8')
 
   def to_dict(self):
     return {
