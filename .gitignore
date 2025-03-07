@@ -1,7 +1,10 @@
 /Lib
 /Scripts
-/server/__pycache__
-/server/test/.pytest_cache
+/server
+  /__pycache__
+  /test
+    /.pytest_cache
+  /media
 __pycache__
 *.cfg
 quillhub.env
