@@ -1,6 +1,9 @@
 import pytest
 from server import Server
 from server.models.user import User
+from server.models.favourite import UserFavouriteArticle
+from bson import ObjectId
+from copy import deepcopy
 
 user_json = {
   "username" : "Milly",
@@ -39,12 +42,28 @@ def login_user(client):
   user = User.objects(email__exact=user_json['email']).first()
   res_message = {
     'status': 200,
-    'message': 'Login Successful.'
+    'message': 'Login Successful.',
+    'data': user.to_dict()
   }
   print(response.get_json())
   assert response.status_code == 200
   assert response.get_json() == res_message
   return response.get_json()
+
+def test_user_account(client, login_user):
+  response = client.get('/account')
+  user_id = ObjectId(login_user['data']['id'])
+  data = deepcopy(login_user['data'])
+  favourite_articles = UserFavouriteArticle.objects(user=user_id).select_related()
+  articles = [fav.article for fav in favourite_articles]
+  data['favourite_articles'] = articles
+  res_message = {
+    "status": 200,
+    "message": "user detail",
+    "data": data
+  }
+  assert response.status_code == 200
+  assert response.get_json() == res_message
 
 def test_user_deactivate(client, login_user):
   response = client.post("/account/deactivate")
