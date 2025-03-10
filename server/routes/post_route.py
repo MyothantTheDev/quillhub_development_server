@@ -7,3 +7,5 @@ post_bp.add_url_rule('/post', methods=['GET'], view_func=post_service.trending_a
 post_bp.add_url_rule('/post/add', methods=['POST'], view_func=post_service.new_articles)
 post_bp.add_url_rule('/post/detail', methods=['GET'], view_func=post_service.detail_article)
 post_bp.add_url_rule('/post/detail/delete', methods=['POST'], view_func=post_service.delete_article)
+
+post_bp.add_url_rule('/post/comment/add', methods=['POST'], view_func=post_service.add_comment)
