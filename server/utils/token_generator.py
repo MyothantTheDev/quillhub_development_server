@@ -28,3 +28,16 @@ def jwt_required(func):
       return {'status': 401, 'message': 'Unauthorize'}
 
   return jwt_check
+
+def adminauthorized_required(func):
+  @wraps(func)
+  def authorization_check(*arg, **kwargs):
+    try:
+      user = User.objects(id__exact=current_user.id).first()
+      if user.role.role == 'ADMIN':
+        return func(*arg, **kwargs)
+      return {'status': 401, 'message': 'Unauthorize'}
+    except:
+      return {'status': 401, 'message': 'Unauthorize'}
+    
+  return authorization_check
