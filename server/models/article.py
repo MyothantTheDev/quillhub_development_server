@@ -29,7 +29,7 @@ class ArticleBlock(EmbeddedDocument):
 
 #The main Article document.
 class Article(Document):
-  content = EmbeddedDocumentField(ArticleBlock)
+  content = ListField(EmbeddedDocumentField(ArticleBlock))
   tags = ListField(StringField(choices=TagType))
   likes = IntField()
 
