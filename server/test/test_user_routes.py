@@ -12,6 +12,14 @@ user_json = {
   "email" : "milly@gmail.com"
 }
 
+admin_user_json = {
+  "username": "James",
+  "password": "J@m3s12345",
+  "confirm_password": "J@m3s12345",
+  "email": "james@gmail.com",
+  "role": "admin"
+}
+
 user_login = {
   'email': "milly@gmail.com",
   'password': 'M!llyB0bby'
@@ -45,7 +53,6 @@ def login_user(client):
     'message': 'Login Successful.',
     'data': user.to_dict()
   }
-  print(response.get_json())
   assert response.status_code == 200
   assert response.get_json() == res_message
   return response.get_json()
@@ -64,6 +71,19 @@ def test_user_account(client, login_user):
   }
   assert response.status_code == 200
   assert response.get_json() == res_message
+
+def test_user_logout(client, login_user):
+  response = client.get('/logout')
+  res_message = {
+    'status': 200,
+    'message': 'User Logout.'
+  }
+  assert response.status_code == 200
+  assert response.get_json() == res_message
+
+
+def test_admin_register(client):
+  pass
 
 def test_user_deactivate(client, login_user):
   response = client.post("/account/deactivate")
