@@ -13,7 +13,7 @@ class RoleSchema(Schema):
       error="Invaild role. Allowed values: "+", ".join(ROLE_TYPES)
     )
   )
-  premission = fields.String(
+  permission = fields.String(
     required=True,
     validate=validate.OneOf(
       PERMISSION_TYPES,
