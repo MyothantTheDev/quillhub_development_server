@@ -44,6 +44,8 @@ def user_update_service():
 # user regiester
 def account_register():
   request_cp : dict = deepcopy(request.json)
+  if request_cp['role'] != None:
+    request_cp.pop('role')
   try:
     validated_result = RegisterSchema().load(request_cp)
     user_check = User.objects(email__exact=validated_result.get('email')).first()
