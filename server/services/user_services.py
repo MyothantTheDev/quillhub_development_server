@@ -8,7 +8,7 @@ from server.schema.user_schema import (
 )
 from flask import request, jsonify, session, make_response
 from copy import deepcopy
-from server.utils.token_generator import token_generator, jwt_required
+from server.middleware.token_generator import token_generator, jwt_required
 from flask_login import login_user, current_user, logout_user, login_required
 import bcrypt
 from server.utils.image_utils import save_picture

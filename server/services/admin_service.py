@@ -3,7 +3,7 @@ from server.models.user import User
 from server.models.article import Article, ArticleBlock
 from server.schema.user_schema import RegisterSchema, ValidationError
 from flask import request, jsonify
-from server.utils.token_generator import adminauthorized_required, jwt_required
+from server.middleware.token_generator import adminauthorized_required, jwt_required
 from server.utils.image_utils import save_media
 from flask_login import login_required, current_user
 
