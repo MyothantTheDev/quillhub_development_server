@@ -2,7 +2,6 @@ from flask import Flask
 import os
 from dotenv import load_dotenv
 from flask_bcrypt import Bcrypt
-from mongoengine import connect
 from flask_login import LoginManager
 from flask_mongoengine2 import MongoEngine
 
@@ -18,9 +17,10 @@ class Server:
     return {
       "db": os.getenv('DB_NAME'),
       "host": os.getenv('DB_HOST'),
-      "port": os.getenv('DB_PORT'),
+      "port": int(os.getenv('DB_PORT')),
       "username": os.getenv('DB_USER'),
-      "password": os.getenv('DB_PWD')
+      "password": os.getenv('DB_PWD'),
+      "authsource": os.getenv('DB_NAME')
     }
 
   def _routes(self, app: Flask):
@@ -34,14 +34,19 @@ class Server:
     app.register_blueprint(admin_bp) # install admin routes
 
   def set_up(self):
+
+    mongo_settings = self._mongo_config()
+    
     app = Flask(__name__)
     app.config.from_mapping(SECRET_KEY=os.getenv('SECRET_KEY'))
     app.config['SESSION_COOKIE_HTTPONLY'] = True
-    mongo_settings = self._mongo_config()
+    app.config["MONGODB_SETTINGS"] = [
+      mongo_settings
+    ]
 
     _bcrypt.init_app(app) # encryption install
     _login_manager.init_app(app) # login manager install
-    self._db.init_app(app, mongo_settings)
+    self._db.init_app(app)
 
     '''
     Routers
