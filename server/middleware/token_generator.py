@@ -23,9 +23,9 @@ def jwt_required(func):
       token = jwt.decode(decoded_codkies.get('token'), current_app.config['SECRET_KEY'], algorithms="HS256")
       if token['user']['id'] ==  str(current_user.id):
         return func(*args, **kwargs)
-      return {'status': 401, 'message': 'Unauthorize'}
+      return {'status': 401, 'message': 'Unauthorize token'}, 401
     except:
-      return {'status': 401, 'message': 'Unauthorize'}
+      return {'status': 401, 'message': 'Unauthorize expire or lack token'}, 401
 
   return jwt_check
 
@@ -36,8 +36,8 @@ def adminauthorized_required(func):
       user = User.objects(id__exact=current_user.id).first()
       if user.role.role == 'ADMIN':
         return func(*arg, **kwargs)
-      return {'status': 401, 'message': 'Unauthorize'}
+      return {'status': 401, 'message': 'Unauthorize role'}, 401
     except:
-      return {'status': 401, 'message': 'Unauthorize'}
+      return {'status': 401, 'message': 'Unauthorize user'}, 401
     
   return authorization_check
