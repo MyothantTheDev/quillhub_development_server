@@ -12,12 +12,16 @@ def register():
   if resquest_cp['role'] == None:
     return {'status': 400, 'message': "Invaild request!"}
   try:
+
     validated_result = RegisterSchema().load(resquest_cp, partial=True)
+
     user_check = User.objects(email__exact=validated_result.get('email')).first()
     if user_check:
-      return {'status': 200, 'message': 'Email is already in used.'}
+      return {'status': 200, 'message': 'Email is already in used.'}, 200
+    
     user = User(**validated_result)
-    if user.validate():
+    try:
+      user.validate()
       user.save()
       return jsonify(
         {
@@ -25,10 +29,12 @@ def register():
           'message': f'Your account ({user.username}) has been created! You are now able to log in.'
         }
       ), 200
-    return {
-      'status': 400,
-      'message' : 'Something went wrong.'
-    }, 400
+    except ValidationError as err:
+      return {
+        'status': 400,
+        'message' : f'ValidationError: {err.messages}'
+      }, 400
+  
   except ValidationError as err:
     return jsonify(
       {'status': 400, 'message': err.messages}
@@ -40,27 +46,40 @@ def register():
 @login_required
 def new_articles():
   try:
-    content = request.form.getlist('content')
-    files = request.files.getlist('files')
+    content = request.form.get('content')
+    files = request.files
+
     if not content:
       return jsonify({'status': 400, 'message': 'Content and files are required'}), 400
-    content_blocks = json.loads(content)
+    
+    try:
+      content_blocks = json.loads(content)
+    
+    except json.JSONDecodeError:
+      return jsonify({'status': 400, 'message': 'Invalid JSONFormat'}), 400
+    
     article_blocks = []
     for block in content_blocks:
-      article_block = ArticleBlock(type=block['type'], text=block['content'], serial_number=block['serial'])
+      if not all(k in block for k in ("type", "text", "serial_number")):
+        return jsonify({'status': 400, 'message': 'Invalid content block format.'}), 400
+      article_block = ArticleBlock(type=block['type'], text=block.get('text', ''), serial_number=block['serial_number'])
+      article_block.validate()
       article_blocks.append(article_block)
+
     if files:
-      for file in files:
-        filename = save_media(file['file'])
-        article_block = ArticleBlock(type=file['type'], image=filename, serial_number=file['serial'])
-        article_blocks.append(article_block)
+      for serial_number, file in files.items():
+        if file and file.filename:
+          filename = save_media(file)
+          article_block = ArticleBlock(type='IMAGE', image=filename, serial_number=serial_number)
+          article_blocks.append(article_block)
+          
     article = Article(
-      title=request.form.get('title'),
       content=article_blocks,
       likes=0,
-      author_id=current_user.id
     )
     article.save()
-    return {'status': 200, 'message': 'Article created successfully'}, 200
+
+    return jsonify({'status': 200, 'message': 'Article created successfully'}), 200
+  
   except Exception as err:
     return jsonify({'status': 500, 'message': str(err)}), 500
