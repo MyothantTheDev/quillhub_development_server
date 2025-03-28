@@ -4,14 +4,21 @@ from dotenv import load_dotenv
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_mongoengine2 import MongoEngine
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 load_dotenv(os.path.abspath(__name__)+'\\config\\quillhub.env')
 _bcrypt = Bcrypt()
 _login_manager = LoginManager()
+_limiter = Limiter(
+  get_remote_address,
+  storage_uri=os.getenv('DB_URI'),
+  default_limits=["100 per minute"]
+  )
 
 class Server:
 
-  _db = MongoEngine()
+  __db = MongoEngine()
   
   def _mongo_config(self):
     return {
@@ -46,7 +53,9 @@ class Server:
 
     _bcrypt.init_app(app) # encryption install
     _login_manager.init_app(app) # login manager install
-    self._db.init_app(app)
+    self.__db.init_app(app) # mongodb install
+    _limiter.init_app(app=app) # limiter install
+
 
     '''
     Routers
