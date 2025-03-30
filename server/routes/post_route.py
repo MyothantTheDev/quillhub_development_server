@@ -1,16 +1,12 @@
 from flask import Blueprint
 from server.services import post_service
+from server.routes.route_endpoints import (
+  post_trending, post_detial, post_delete,
+  post_comment
+)
 
 post_bp = Blueprint('posts', __name__)
 
-# route prefix
-route_prefix = '/post/'
-
-# post route contansts
-post_trending = route_prefix+'trending'
-post_detial = route_prefix+'detial'
-post_delete = post_detial+'/delete'
-post_comment = route_prefix+'comment/add'
 
 # post routes
 post_bp.add_url_rule(post_trending, methods=['GET'], view_func=post_service.trending_articles)
