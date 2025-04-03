@@ -16,8 +16,7 @@ post_endpoints_prefix = f'{route_prefix}post/'
 
 post_all = f'{post_endpoints_prefix}all/<page_number>'
 post_category = f'{post_endpoints_prefix}<category>/<page_number>'
-post_detial = f'{post_endpoints_prefix}detial'
-post_delete = f'{post_endpoints_prefix}delete'
+post_detial = f'{post_endpoints_prefix}detial/<post_id>'
 post_comment = f'{post_endpoints_prefix}comment/add'
 
 # admin endpoints
@@ -25,3 +24,4 @@ admin_endpoints_prefix = f'{route_prefix}admin/'
 
 admin_acc_register = f'{admin_endpoints_prefix}register'
 admin_post_add = f'{admin_endpoints_prefix}post/new'
+admin_post_delete = f'{admin_endpoints_prefix}post/delete'
