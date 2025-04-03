@@ -1,6 +1,6 @@
 import json
 from server.models.user import User
-from server.models.article import Article, ArticleBlock
+from server.models.article import Article, ArticleBlock, Teaser
 from server.schema.user_schema import RegisterSchema, ValidationError
 from flask import request, jsonify
 from server.middleware.token_generator import adminauthorized_required, jwt_required
@@ -59,12 +59,22 @@ def new_articles():
       return jsonify({'status': 400, 'message': 'Invalid JSONFormat'}), 400
     
     article_blocks = []
+    title = ''
+    teaser_text = ''
     for block in content_blocks:
       if not all(k in block for k in ("type", "text", "serial_number")):
         return jsonify({'status': 400, 'message': 'Invalid content block format.'}), 400
+      
+      if block['serial_number'] == 0:
+        title = block['text']
+      if block['serial_number'] == 1:
+        teaser_text = block['text']
+
       article_block = ArticleBlock(type=block['type'], text=block.get('text', ''), serial_number=block['serial_number'])
       article_block.validate()
       article_blocks.append(article_block)
+
+    filename = ''
 
     if files:
       for serial_number, file in files.items():
@@ -72,11 +82,18 @@ def new_articles():
           filename = save_media(file)
           article_block = ArticleBlock(type='IMAGE', image=filename, serial_number=serial_number)
           article_blocks.append(article_block)
+
+    teaser = None
+    if title != '' and teaser_text != '' and filename != '':
+      teaser = Teaser(title=title, image=filename, text=teaser_text)
+      teaser.validate()
           
     article = Article(
       content=article_blocks,
       likes=0,
     )
+    if teaser != None:
+      article.teaser = teaser
     article.save()
 
     return jsonify({'status': 200, 'message': 'Article created successfully'}), 200
