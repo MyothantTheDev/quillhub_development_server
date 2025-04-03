@@ -39,11 +39,25 @@ class ArticleBlock(EmbeddedDocument):
       "serial_number": self.serial_number
     }
 
+#An embedded document for a teaser within an article.
+class Teaser(EmbeddedDocument):
+  title = StringField(required=True)
+  image = StringField(required=True)
+  text = StringField(required=True)
+
+  def to_dict(self):
+    return {
+      'title': self.title,
+      'image': self.image,
+      'text': self.text
+    }
+
 #The main Article document.
 class Article(Document):
   content = ListField(EmbeddedDocumentField(ArticleBlock))
   tags = ListField(StringField(choices=TagType))
   likes = IntField()
+  teaser = EmbeddedDocumentField(Teaser)
 
   meta = { 'collection': 'articles' }
 
@@ -51,5 +65,6 @@ class Article(Document):
     return {
       "content": self.content.to_dict(),
       "tags": self.tags,
-      "likes": self.likes
+      "likes": self.likes,
+      "teaser": self.teaser.to_dict()
     }
