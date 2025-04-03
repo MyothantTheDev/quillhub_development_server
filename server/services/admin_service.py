@@ -5,19 +5,20 @@ from server.schema.user_schema import RegisterSchema, ValidationError
 from flask import request, jsonify
 from server.middleware.token_generator import adminauthorized_required, jwt_required
 from server.utils.image_utils import save_media
-from flask_login import login_required, current_user
+from flask_login import login_required
+import copy as cp
 
 def register():
   resquest_cp : dict = request.json
   if resquest_cp['role'] == None:
-    return {'status': 400, 'message': "Invaild request!"}
+    return jsonify({'status': 400, 'message': "Invaild request!"}), 400
   try:
 
     validated_result = RegisterSchema().load(resquest_cp, partial=True)
 
     user_check = User.objects(email__exact=validated_result.get('email')).first()
     if user_check:
-      return {'status': 200, 'message': 'Email is already in used.'}, 200
+      return jsonify({'status': 200, 'message': 'Email is already in used.'}), 200
     
     user = User(**validated_result)
     try:
@@ -100,3 +101,20 @@ def new_articles():
   
   except Exception as err:
     return jsonify({'status': 500, 'message': str(err)}), 500
+  
+  
+@adminauthorized_required
+@jwt_required
+@login_required
+def delete_article():
+  request_cp :dict = cp.deepcopy(request.json)
+
+  if request_cp['post_id'] == None:
+    return jsonify({'status': 400, 'message': 'Invalid post id.'}), 400
+    
+  try:
+    article = Article.objects(id__exact=request_cp['post_id']).first()
+    article.delete()
+    return jsonify({'status': 200, 'message': 'Delete article successful.'}), 200
+  except:
+    return jsonify({'status': 500, 'message': 'Something went wrong.'}), 500
