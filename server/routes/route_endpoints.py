@@ -14,9 +14,10 @@ account_update = f'{user_endpoint_prefix}update'
 # post endpoints
 post_endpoints_prefix = f'{route_prefix}post/'
 
-post_trending = f'{post_endpoints_prefix}trending'
+post_all = f'{post_endpoints_prefix}all/<page_number>'
+post_category = f'{post_endpoints_prefix}<category>/<page_number>'
 post_detial = f'{post_endpoints_prefix}detial'
-post_delete = f'{post_endpoints_prefix}/delete'
+post_delete = f'{post_endpoints_prefix}delete'
 post_comment = f'{post_endpoints_prefix}comment/add'
 
 # admin endpoints
