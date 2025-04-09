@@ -2,35 +2,46 @@ from flask import jsonify, request
 from server.models.article import Article
 from server.models.comment import Comment
 from flask_login import current_user, login_required
-from server.middleware.token_generator import jwt_required, adminauthorized_required
+from server.middleware.token_generator import jwt_required
 import re
 import copy as cp
+import json
 
 def all_article(page_number):
   try:
+
     re_pattern = r'\b\d+\b'
     if not re.fullmatch(re_pattern, page_number):
       return jsonify({'status': 401, 'message': 'Page number should be integer.'}), 401
+    
     page_number = int(page_number)
-    page_size = 5
+    page_size = 10
     begin = (page_number - 1) * page_size
     end = begin + page_size
-    articles = Article.objects[begin:end]()
-    articles = [article.to_json() for article in articles]
-    return jsonify(
+    articles = Article.objects[begin:end]
+
+    processed_articles = []
+    for article in articles:
+      temp :dict = json.loads(article.to_json())
+      temp.pop('content')
+      processed_articles.append(temp)
+
+    response = jsonify(
       {
         'status': 200, 
         'message': 'Retrieved articles successful.',
-        'data': articles
+        'data': processed_articles
       }
-      ), 200
-  except:
+    )
+    response.headers['Connection'] = 'keep-alive'
+    return response, 200
+  except Exception as e:
     return jsonify(
       {
-        'status': 401,
-        'message': 'Something went wrong.'
+        'status': 500,
+        'message': f'Error: {e}.'
       }
-    ), 401
+    ), 500
   
 
 def categories_articles(category, page_number):
