@@ -6,15 +6,16 @@ from flask_login import LoginManager
 from flask_mongoengine2 import MongoEngine
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from waitress import serve
 
 load_dotenv(os.path.abspath(__name__)+'\\config\\quillhub.env')
 _bcrypt = Bcrypt()
 _login_manager = LoginManager()
-# _limiter = Limiter(
-#   get_remote_address,
-#   storage_uri=os.getenv('DB_URI'),
-#   default_limits=["100 per minute"]
-#   )
+_limiter = Limiter(
+  get_remote_address,
+  storage_uri=os.getenv('DB_URI'),
+  default_limits=["100 per minute"]
+  )
 
 class Server:
 
@@ -50,12 +51,12 @@ class Server:
     app.config["MONGODB_SETTINGS"] = [
       mongo_settings
     ]
-    app.config['USE_X_SENDFILE']
+    app.config['USE_X_SENDFILE'] = True
 
     _bcrypt.init_app(app) # encryption install
     _login_manager.init_app(app) # login manager install
     self.__db.init_app(app) # mongodb install
-    # _limiter.init_app(app=app) # limiter install
+    _limiter.init_app(app=app) # limiter install
 
 
     '''
@@ -65,6 +66,10 @@ class Server:
 
     return app
 
-  def start(self, debug=True, host='127.0.0.1', port=5000):
+  def start(self, production, debug=True, host='127.0.0.1', port=5000):
     app = self.set_up()
-    app.run(debug=debug, host=host, port=port)
+    if production:
+      print('Flask WSGI server started.\nQuillHub Blog server is running with 4 threads.')
+      serve(app.wsgi_app, host=host, port=port, threads=4)
+    else:
+      app.run(host=host, port=port, debug=debug)
