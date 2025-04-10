@@ -3,8 +3,11 @@ import os
 from PIL import Image
 from flask import current_app
 
+def media_fp():
+  return os.path.join(current_app.root_path, 'media')
+
 def path_filename_generator(filename):
-  MEDIA_FOLDER = os.path.join(current_app.root_path, 'media')
+  MEDIA_FOLDER = media_fp()
   random_hex = secrets.token_hex(8)
   _, f_ext = os.path.splitext(filename)
   filename = random_hex + f_ext
