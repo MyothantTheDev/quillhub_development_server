@@ -36,7 +36,7 @@ def all_article(page_number):
         'data': processed_articles
       }
     )
-    response.headers['Connection'] = 'keep-alive'
+    
     return response, 200
   except Exception as e:
     return jsonify(
