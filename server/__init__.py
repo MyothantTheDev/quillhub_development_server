@@ -10,11 +10,11 @@ from flask_limiter.util import get_remote_address
 load_dotenv(os.path.abspath(__name__)+'\\config\\quillhub.env')
 _bcrypt = Bcrypt()
 _login_manager = LoginManager()
-_limiter = Limiter(
-  get_remote_address,
-  storage_uri=os.getenv('DB_URI'),
-  default_limits=["100 per minute"]
-  )
+# _limiter = Limiter(
+#   get_remote_address,
+#   storage_uri=os.getenv('DB_URI'),
+#   default_limits=["100 per minute"]
+#   )
 
 class Server:
 
@@ -50,11 +50,12 @@ class Server:
     app.config["MONGODB_SETTINGS"] = [
       mongo_settings
     ]
+    app.config['USE_X_SENDFILE']
 
     _bcrypt.init_app(app) # encryption install
     _login_manager.init_app(app) # login manager install
     self.__db.init_app(app) # mongodb install
-    _limiter.init_app(app=app) # limiter install
+    # _limiter.init_app(app=app) # limiter install
 
 
     '''
