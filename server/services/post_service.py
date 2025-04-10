@@ -1,11 +1,14 @@
-from flask import jsonify, request
+from flask import jsonify, request, send_file
 from server.models.article import Article
 from server.models.comment import Comment
 from flask_login import current_user, login_required
 from server.middleware.token_generator import jwt_required
+from server.utils.image_utils import media_fp
 import re
 import copy as cp
 import json
+import os
+import mimetypes
 
 def all_article(page_number):
   try:
@@ -98,3 +101,23 @@ def add_comment():
   
   except:
     return jsonify({'status': 500, 'message': 'Something went wrong.'})
+  
+
+def image_render(image):
+  allowed_extensions = ['jpg', 'png', 'gif', 'jpeg']
+  _, ext = image.split('.')
+
+  folder = media_fp()
+  file_path = os.path.join(folder, image)
+  if not os.path.exists(file_path) or ext not in allowed_extensions:
+    file_path = os.path.join(folder, 'default.jpg')
+  
+  file = open(file_path, 'rb')
+
+  return send_file(
+    file, 
+    mimetype= mimetypes.guess_type(file_path)[0],  
+    conditional=True, 
+    etag=True, 
+    last_modified=os.path.getmtime(file_path),
+    )
