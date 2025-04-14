@@ -4,6 +4,7 @@ from server.models.comment import Comment
 from flask_login import current_user, login_required
 from server.middleware.token_generator import jwt_required
 from server.utils.image_utils import media_fp
+from server.utils.articale_seriallizer import seriallizer
 import re
 import copy as cp
 import json
@@ -23,17 +24,12 @@ def all_article(page_number):
     end = begin + page_size
     articles = Article.objects[begin:end]
 
-    processed_articles = []
-    for article in articles:
-      temp :dict = json.loads(article.to_json())
-      temp.pop('content')
-      processed_articles.append(temp)
-
+    articles = seriallizer(articles , "content")
     response = jsonify(
       {
         'status': 200, 
         'message': 'Retrieved articles successful.',
-        'data': processed_articles
+        'data': articles
       }
     )
     
@@ -57,7 +53,7 @@ def categories_articles(category, page_number):
     begin = (page_number - 1) * page_size
     end = begin + page_size
     articles = Article.objects(tags__in=[category])[begin:end]
-    articles = [article.to_json() for article in articles]
+    articles =  seriallizer(articles , "content")
     return jsonify(
       {
         'status': 200,
